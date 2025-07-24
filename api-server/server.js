@@ -97,14 +97,43 @@ async function triggerBuilds(changeType, fileName) {
   Object.entries(BUILD_WEBHOOKS).forEach(([service, url]) => {
     if (url) {
       console.log(`🚀 Triggering ${service} build...`);
-      const promise = axios.post(url, {
-        trigger: 'markdown_file_change',
-        changeType,
-        fileName,
-        timestamp: new Date().toISOString()
-      }).catch(error => {
-        console.error(`❌ Failed to trigger ${service} build:`, error.message);
-      });
+      
+      let promise;
+      if (service === 'github') {
+        // GitHub repository dispatch requires special formatting
+        promise = axios.post(url, {
+          event_type: 'markdown_file_change',
+          client_payload: {
+            changeType,
+            fileName,
+            timestamp: new Date().toISOString(),
+            trigger: 'api_file_change'
+          }
+        }, {
+          headers: {
+            'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          }
+        }).catch(error => {
+          console.error(`❌ Failed to trigger ${service} build:`, error.message);
+          if (error.response) {
+            console.error(`   Status: ${error.response.status}`);
+            console.error(`   Response: ${JSON.stringify(error.response.data)}`);
+          }
+        });
+      } else {
+        // Standard webhook format for other services
+        promise = axios.post(url, {
+          trigger: 'markdown_file_change',
+          changeType,
+          fileName,
+          timestamp: new Date().toISOString()
+        }).catch(error => {
+          console.error(`❌ Failed to trigger ${service} build:`, error.message);
+        });
+      }
+      
       promises.push(promise);
     }
   });
@@ -114,6 +143,10 @@ async function triggerBuilds(changeType, fileName) {
     console.log('✅ Build triggers sent');
   } else {
     console.log('⚠️  No build webhooks configured');
+    console.log('💡 To enable auto-deployment, configure environment variables:');
+    console.log('   - NETLIFY_BUILD_HOOK_URL for Netlify');
+    console.log('   - VERCEL_BUILD_HOOK_URL for Vercel');
+    console.log('   - GITHUB_BUILD_HOOK_URL + GITHUB_TOKEN for GitHub Pages');
   }
 }
 

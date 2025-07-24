@@ -1,24 +1,68 @@
-name: Deploy Gatsby Site
+name: Deploy to GitHub Pages
 
 on:
   # Trigger on pushes to main branch
   push:
     branches: [ main ]
+    paths:
+      - 'api-server/markdown-files/**'
+      - 'src/**'
+      - 'gatsby-*.js'
+      - 'package*.json'
   
-  # Allow manual triggering
+  # Allow manual triggering from GitHub UI
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual deploy'
+        required: false
+        default: 'Manual deployment'
   
-  # Trigger via repository dispatch (webhook)
+  # Trigger via repository dispatch (API webhook)
   repository_dispatch:
-    types: [markdown_file_change]
+    types: 
+      - markdown_file_change
+      - content_update
+      - force_rebuild
+
+# Set permissions for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for better caching
+    
+    - name: Detect trigger type
+      id: trigger
+      run: |
+        if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+          echo "trigger_type=webhook" >> $GITHUB_OUTPUT
+          echo "trigger_reason=${{ github.event.client_payload.changeType || 'API webhook' }}" >> $GITHUB_OUTPUT
+          echo "changed_file=${{ github.event.client_payload.fileName || 'unknown' }}" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          echo "trigger_type=manual" >> $GITHUB_OUTPUT
+          echo "trigger_reason=${{ github.event.inputs.reason }}" >> $GITHUB_OUTPUT
+        else
+          echo "trigger_type=push" >> $GITHUB_OUTPUT
+          echo "trigger_reason=Code push to main branch" >> $GITHUB_OUTPUT
+        fi
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -26,42 +70,100 @@ jobs:
         node-version: '18'
         cache: 'npm'
     
+    - name: Cache API server dependencies
+      uses: actions/cache@v3
+      with:
+        path: api-server/node_modules
+        key: ${{ runner.os }}-api-modules-${{ hashFiles('api-server/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-api-modules-
+    
     - name: Install dependencies
       run: |
-        npm install
-        cd api-server && npm install && cd ..
+        echo "🔧 Installing Gatsby dependencies..."
+        npm ci
+        echo "🔧 Installing API server dependencies..."
+        cd api-server && npm ci && cd ..
     
     - name: Start API server
       run: |
+        echo "🚀 Starting API server..."
         cd api-server && npm start &
-        sleep 5
+        API_PID=$!
+        echo "API_PID=$API_PID" >> $GITHUB_ENV
+        
+        # Wait for API server to be ready
+        echo "⏳ Waiting for API server to start..."
+        for i in {1..30}; do
+          if curl -s http://localhost:3001/api/status > /dev/null; then
+            echo "✅ API server is ready!"
+            break
+          fi
+          if [ $i -eq 30 ]; then
+            echo "❌ API server failed to start within 30 seconds"
+            exit 1
+          fi
+          sleep 1
+        done
+    
+    - name: Validate API data
+      run: |
+        echo "🔍 Validating API data..."
+        API_RESPONSE=$(curl -s http://localhost:3001/api/markdown-files)
+        echo "API Response: $API_RESPONSE"
+        
+        # Check if we have markdown files
+        FILE_COUNT=$(echo $API_RESPONSE | jq '.data | length')
+        echo "📄 Found $FILE_COUNT markdown files"
+        
+        if [ "$FILE_COUNT" -eq 0 ]; then
+          echo "⚠️ Warning: No markdown files found in API response"
+        fi
     
     - name: Build Gatsby site
-      run: npm run build:full
+      run: |
+        echo "🏗️ Building Gatsby site..."
+        echo "Trigger: ${{ steps.trigger.outputs.trigger_type }}"
+        echo "Reason: ${{ steps.trigger.outputs.trigger_reason }}"
+        if [ "${{ steps.trigger.outputs.changed_file }}" != "" ]; then
+          echo "Changed file: ${{ steps.trigger.outputs.changed_file }}"
+        fi
+        
+        npm run build:full
+        
+        echo "📊 Build statistics:"
+        echo "Total files: $(find public -type f | wc -l)"
+        echo "HTML files: $(find public -name "*.html" | wc -l)"
+        echo "JS files: $(find public -name "*.js" | wc -l)"
+        echo "CSS files: $(find public -name "*.css" | wc -l)"
+    
+    - name: Setup GitHub Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./public
     
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/main'
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./public
+      id: deployment
+      uses: actions/deploy-pages@v4
     
-    # Alternative: Deploy to Netlify
-    # - name: Deploy to Netlify
-    #   uses: nwtgck/actions-netlify@v2.0
-    #   with:
-    #     publish-dir: './public'
-    #     production-branch: main
-    #     production-deploy: true
-    #   env:
-    #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-    #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+    - name: Cleanup
+      if: always()
+      run: |
+        if [ ! -z "$API_PID" ]; then
+          echo "🧹 Stopping API server (PID: $API_PID)"
+          kill $API_PID 2>/dev/null || true
+        fi
     
-    # Alternative: Deploy to Vercel
-    # - name: Deploy to Vercel
-    #   uses: amondnet/vercel-action@v25
-    #   with:
-    #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
-    #     vercel-org-id: ${{ secrets.ORG_ID }}
-    #     vercel-project-id: ${{ secrets.PROJECT_ID }}
-    #     working-directory: ./
+    - name: Post-deployment verification
+      if: success()
+      run: |
+        echo "✅ Deployment successful!"
+        echo "🌐 Site URL: ${{ steps.deployment.outputs.page_url }}"
+        echo "📝 Deployment details:"
+        echo "  - Trigger: ${{ steps.trigger.outputs.trigger_type }}"
+        echo "  - Reason: ${{ steps.trigger.outputs.trigger_reason }}"
+        echo "  - Commit: ${{ github.sha }}"
+        echo "  - Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
