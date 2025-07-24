@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   # Trigger on pushes to main branch
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'api-server/markdown-files/**'
       - 'src/**'
@@ -61,7 +61,7 @@ jobs:
           echo "trigger_reason=${{ github.event.inputs.reason }}" >> $GITHUB_OUTPUT
         else
           echo "trigger_type=push" >> $GITHUB_OUTPUT
-          echo "trigger_reason=Code push to main branch" >> $GITHUB_OUTPUT
+          echo "trigger_reason=Code push to master branch" >> $GITHUB_OUTPUT
         fi
     
     - name: Setup Node.js
