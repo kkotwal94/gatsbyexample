@@ -34,8 +34,20 @@ exports.sourceNodes = async ({ actions, createNodeId, createContentDigest }) => 
   
   try {
     // Fetch markdown files from our API
-    const response = await axios.get('http://localhost:3001/api/markdown-files');
+    console.log('Attempting to fetch markdown files from API...');
+    const response = await axios.get('http://localhost:3001/api/markdown-files', {
+      timeout: 10000, // 10 second timeout
+      headers: {
+        'User-Agent': 'Gatsby-Build'
+      }
+    });
+    
+    if (!response.data || !response.data.success) {
+      throw new Error('API response indicates failure');
+    }
+    
     const markdownFiles = response.data.data;
+    console.log(`Successfully fetched ${markdownFiles.length} markdown files from API`);
     
     // Create nodes for each markdown file
     markdownFiles.forEach(file => {
@@ -51,26 +63,44 @@ exports.sourceNodes = async ({ actions, createNodeId, createContentDigest }) => 
       createNode(nodeData);
     });
   } catch (error) {
-    console.error('Error fetching markdown files:', error);
-    // If API is not running, create some dummy data for development
-    console.log('Creating dummy data for development...');
+    console.error('Error fetching markdown files:', error.message);
+    console.error('API URL attempted:', 'http://localhost:3001/api/markdown-files');
+    // If API is not running, use static fallback data
+    console.log('⚠️  API server not accessible, loading static fallback data...');
     
-    const dummyData = [
-      {
-        id: 'dummy-1',
-        slug: 'dummy-post',
-        title: 'Dummy Post',
-        description: 'This is a dummy post for development',
-        image: '/images/placeholder.jpg',
-        footerText: 'Footer text here',
-        template: 'template1',
-        content: '# Dummy Content\n\nThis is dummy content for development.',
-        date: '2024-01-01',
-        author: 'Dev Team'
-      }
-    ];
+    // Load static fallback data
+    const fs = require('fs');
+    const path = require('path');
     
-    dummyData.forEach(file => {
+    try {
+      const fallbackDataPath = path.join(__dirname, 'src', 'data', 'posts.json');
+      const fallbackData = JSON.parse(fs.readFileSync(fallbackDataPath, 'utf8'));
+      console.log(`✅ Loaded ${fallbackData.length} posts from static fallback data`);
+      
+      // Use fallback data instead of dummy data
+      var markdownFiles = fallbackData;
+    } catch (fallbackError) {
+      console.error('Error loading fallback data:', fallbackError.message);
+      console.log('Creating minimal dummy data as last resort...');
+      
+      var markdownFiles = [
+        {
+          id: 'dummy-1',
+          slug: 'dummy-post',
+          title: 'Site Under Construction',
+          description: 'This site is currently being set up. Please check back soon!',
+          image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=1200&h=800&fit=crop',
+          footerText: 'Thank you for your patience while we set up the site.',
+          template: 'template1',
+          content: '# Site Under Construction\n\nWe\'re currently setting up this site. Please check back soon for great content!',
+          date: '2024-01-01',
+          author: 'Site Admin'
+        }
+      ];
+    }
+    
+    // Create nodes from fallback data
+    markdownFiles.forEach(file => {
       const nodeData = {
         ...file,
         id: createNodeId(`markdown-${file.id}`),

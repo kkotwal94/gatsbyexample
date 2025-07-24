@@ -109,15 +109,45 @@ jobs:
     - name: Validate API data
       run: |
         echo "🔍 Validating API data..."
+        
+        # Test API connectivity first
+        if curl -f http://localhost:3001/api/status; then
+          echo "✅ API server status endpoint accessible"
+        else
+          echo "❌ API server status endpoint not accessible"
+          exit 1
+        fi
+        
+        # Get markdown files
         API_RESPONSE=$(curl -s http://localhost:3001/api/markdown-files)
-        echo "API Response: $API_RESPONSE"
+        echo "📋 API Response length: ${#API_RESPONSE} characters"
+        
+        # Validate JSON structure
+        if echo "$API_RESPONSE" | jq empty 2>/dev/null; then
+          echo "✅ Valid JSON response received"
+        else
+          echo "❌ Invalid JSON response"
+          echo "Response: $API_RESPONSE"
+          exit 1
+        fi
         
         # Check if we have markdown files
-        FILE_COUNT=$(echo $API_RESPONSE | jq '.data | length')
-        echo "📄 Found $FILE_COUNT markdown files"
-        
-        if [ "$FILE_COUNT" -eq 0 ]; then
-          echo "⚠️ Warning: No markdown files found in API response"
+        if echo "$API_RESPONSE" | jq -e '.success and .data' > /dev/null; then
+          FILE_COUNT=$(echo $API_RESPONSE | jq '.data | length')
+          echo "📄 Found $FILE_COUNT markdown files"
+          
+          if [ "$FILE_COUNT" -eq 0 ]; then
+            echo "❌ No markdown files found in API response"
+            exit 1
+          fi
+          
+          # List the files found
+          echo "📝 Files found:"
+          echo $API_RESPONSE | jq -r '.data[].title'
+        else
+          echo "❌ API response doesn't have expected structure"
+          echo "Response: $API_RESPONSE"
+          exit 1
         fi
     
     - name: Build Gatsby site
