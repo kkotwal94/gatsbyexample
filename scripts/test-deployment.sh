@@ -5,8 +5,16 @@
 
 set -e
 
+# Get the directory where the script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Change to project root directory
+cd "$PROJECT_ROOT"
+
 echo "🧪 Testing GitHub Pages Deployment Workflow Locally"
 echo "=================================================="
+echo "📁 Running from: $(pwd)"
 
 # Colors for output
 RED='\033[0;31m'
@@ -41,14 +49,14 @@ fi
 # Step 1: Install dependencies
 print_status "Installing dependencies..."
 npm install
-cd api-server && npm install && cd ..
+cd "$PROJECT_ROOT/api-server" && npm install && cd "$PROJECT_ROOT"
 print_success "Dependencies installed"
 
 # Step 2: Start API server
 print_status "Starting API server..."
-cd api-server && npm start &
+cd "$PROJECT_ROOT/api-server" && npm start &
 API_PID=$!
-cd ..
+cd "$PROJECT_ROOT"
 
 # Wait for API server to be ready
 print_status "Waiting for API server to start..."
@@ -149,7 +157,7 @@ fi
 
 # Step 9: File change simulation
 print_status "Testing file change detection..."
-echo "## Test Section - $(date)" >> api-server/markdown-files/post-1.md
+echo "## Test Section - $(date)" >> "$PROJECT_ROOT/api-server/markdown-files/post-1.md"
 sleep 3  # Wait for file watcher to detect change
 print_success "File change test completed - check API server logs for webhook triggers"
 
@@ -159,7 +167,7 @@ kill $API_PID 2>/dev/null || true
 kill $SERVE_PID 2>/dev/null || true
 
 # Restore original file
-git checkout api-server/markdown-files/post-1.md 2>/dev/null || true
+cd "$PROJECT_ROOT" && git checkout api-server/markdown-files/post-1.md 2>/dev/null || true
 
 echo ""
 echo "🎉 Local deployment test completed!"
