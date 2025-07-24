@@ -1,0 +1,36 @@
+{
+  "name": "gatsby-markdown-api-example",
+  "version": "1.0.0",
+  "description": "Gatsby example with markdown files from API and multiple templates",
+  "main": "index.js",
+  "scripts": {
+    "develop": "gatsby develop",
+    "build": "gatsby build",
+    "build:analyze": "gatsby build --open-tracing-config-file ./tracing.yml",
+    "build:full": "npm run clean && npm run build",
+    "serve": "gatsby serve",
+    "serve:host": "gatsby serve --host 0.0.0.0",
+    "clean": "gatsby clean",
+    "start-api": "cd api-server && npm start",
+    "dev": "concurrently \"npm run start-api\" \"npm run develop\"",
+    "build:with-api": "concurrently --kill-others --success first \"npm run start-api\" \"npm run build:full\"",
+    "build:deploy": "node build.js",
+    "preview": "npm run build && npm run serve"
+  },
+  "dependencies": {
+    "gatsby": "^5.13.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "axios": "^1.6.2",
+    "styled-components": "^6.1.8",
+    "gatsby-plugin-styled-components": "^6.13.0",
+    "gatsby-plugin-image": "^3.13.0",
+    "gatsby-plugin-sharp": "^5.13.0",
+    "gatsby-transformer-sharp": "^5.13.0",
+    "gatsby-source-filesystem": "^5.13.0",
+    "react-markdown": "^9.0.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
