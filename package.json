@@ -17,22 +17,24 @@
     "build:deploy": "node build.js",
     "preview": "npm run build && npm run serve",
     "test:deployment": "bash ./scripts/test-deployment.sh",
-    "test:build": "concurrently --kill-others --success first \"npm run start-api\" \"sleep 5 && npm run build:full\""
+    "test:build": "concurrently --kill-others --success first \"npm run start-api\" \"sleep 5 && npm run build:full\"",
+    "deploy:gh-pages": "gh-pages -d public"
   },
   "dependencies": {
-    "gatsby": "^5.13.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "axios": "^1.6.2",
-    "styled-components": "^6.1.8",
-    "gatsby-plugin-styled-components": "^6.13.0",
+    "gatsby": "^5.13.1",
     "gatsby-plugin-image": "^3.13.0",
     "gatsby-plugin-sharp": "^5.13.0",
-    "gatsby-transformer-sharp": "^5.13.0",
+    "gatsby-plugin-styled-components": "^6.13.0",
     "gatsby-source-filesystem": "^5.13.0",
-    "react-markdown": "^9.0.1"
+    "gatsby-transformer-sharp": "^5.13.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
+    "styled-components": "^6.1.8"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "gh-pages": "^6.3.0"
   }
 }
