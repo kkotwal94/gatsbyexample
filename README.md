@@ -1,4 +1,4 @@
-# Gatsby Markdown API Example
+# Gatsby Markdown API Examples
 
 This project demonstrates how to build a Gatsby site that sources markdown content from an external API and displays it using multiple template styles.
 
