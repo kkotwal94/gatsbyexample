@@ -1,0 +1,169 @@
+name: Test Build (Development)
+
+on:
+  # Test on pull requests
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'api-server/markdown-files/**'
+      - 'src/**'
+      - 'gatsby-*.js'
+      - 'package*.json'
+  
+  # Manual testing
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of test to run'
+        required: true
+        default: 'build-only'
+        type: choice
+        options:
+        - build-only
+        - api-test
+        - full-test
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        echo "🔧 Installing dependencies..."
+        npm ci
+        cd api-server && npm ci && cd ..
+    
+    - name: Start API server (if needed)
+      if: github.event.inputs.test_type != 'build-only'
+      run: |
+        echo "🚀 Starting API server for testing..."
+        cd api-server && npm start &
+        API_PID=$!
+        echo "API_PID=$API_PID" >> $GITHUB_ENV
+        
+        # Wait for API server
+        echo "⏳ Waiting for API server..."
+        for i in {1..30}; do
+          if curl -s http://localhost:3001/api/status > /dev/null; then
+            echo "✅ API server is ready!"
+            break
+          fi
+          sleep 1
+        done
+    
+    - name: Test API endpoints
+      if: github.event.inputs.test_type == 'api-test' || github.event.inputs.test_type == 'full-test'
+      run: |
+        echo "🔍 Testing API endpoints..."
+        
+        # Test status endpoint
+        echo "Testing /api/status..."
+        curl -f http://localhost:3001/api/status || exit 1
+        
+        # Test markdown files endpoint
+        echo "Testing /api/markdown-files..."
+        RESPONSE=$(curl -s http://localhost:3001/api/markdown-files)
+        FILE_COUNT=$(echo $RESPONSE | jq '.data | length')
+        echo "Found $FILE_COUNT markdown files"
+        
+        if [ "$FILE_COUNT" -eq 0 ]; then
+          echo "❌ No markdown files found!"
+          exit 1
+        fi
+        
+        # Test individual file endpoint
+        echo "Testing /api/markdown-files/post-1..."
+        curl -f http://localhost:3001/api/markdown-files/post-1 || exit 1
+        
+        echo "✅ All API tests passed!"
+    
+    - name: Test Gatsby build
+      run: |
+        echo "🏗️ Testing Gatsby build..."
+        npm run build:full
+        
+        # Verify build output
+        if [ ! -d "public" ]; then
+          echo "❌ Build failed - no public directory created"
+          exit 1
+        fi
+        
+        echo "📊 Build verification:"
+        echo "Total files: $(find public -type f | wc -l)"
+        echo "HTML files: $(find public -name "*.html" | wc -l)"
+        echo "JS files: $(find public -name "*.js" | wc -l)"
+        
+        # Check for essential files
+        if [ ! -f "public/index.html" ]; then
+          echo "❌ Missing index.html"
+          exit 1
+        fi
+        
+        if [ ! -d "public/posts" ]; then
+          echo "❌ Missing posts directory"
+          exit 1
+        fi
+        
+        echo "✅ Build test passed!"
+    
+    - name: Test production server
+      if: github.event.inputs.test_type == 'full-test'
+      run: |
+        echo "🌐 Testing production server..."
+        npm run serve &
+        SERVE_PID=$!
+        echo "SERVE_PID=$SERVE_PID" >> $GITHUB_ENV
+        
+        # Wait for server to start
+        sleep 5
+        
+        # Test homepage
+        if curl -f http://localhost:9000/ > /dev/null 2>&1; then
+          echo "✅ Homepage accessible"
+        else
+          echo "❌ Homepage not accessible"
+          exit 1
+        fi
+        
+        # Test a post page
+        if curl -f http://localhost:9000/posts/post-1/ > /dev/null 2>&1; then
+          echo "✅ Post page accessible"
+        else
+          echo "❌ Post page not accessible"
+          exit 1
+        fi
+        
+        echo "✅ Production server test passed!"
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        if [ ! -z "$API_PID" ]; then
+          echo "🧹 Stopping API server"
+          kill $API_PID 2>/dev/null || true
+        fi
+        if [ ! -z "$SERVE_PID" ]; then
+          echo "🧹 Stopping production server"
+          kill $SERVE_PID 2>/dev/null || true
+        fi
+    
+    - name: Upload build artifacts (on failure)
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-logs
+        path: |
+          public/
+          .cache/
+          *.log
+        retention-days: 7
