@@ -1,9 +1,10 @@
 module.exports = {
+  pathPrefix: `/gatsbyexample`,
   siteMetadata: {
     title: `Gatsby Markdown API Example`,
     description: `A Gatsby site that sources markdown files from an API with multiple templates`,
     author: `@gatsbyjs`,
-    siteUrl: `http://localhost:8000`,
+    siteUrl: `https://kkotwal94.github.io/gatsbyexample`,
   },
   plugins: [
     `gatsby-plugin-styled-components`,
