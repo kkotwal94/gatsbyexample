@@ -1,5 +1,5 @@
 ---
-title: "Getting Started with Modern Web Development TEST2"
+title: "Getting Started with Modern Web Development TESTLIVE2"
 description: "Learn the fundamentals of modern web development with React, Gatsby, and GraphQL"
 image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&h=800&fit=crop"
 footerText: "Ready to start your web development journey? Contact us for a free consultation!"
