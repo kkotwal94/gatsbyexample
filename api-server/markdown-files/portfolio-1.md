@@ -2,7 +2,7 @@
 title: Creative Portfolio Showcases
 description: Explore my journey through design, development, and digital innovation
 image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop"
-template: "template3"
+template: template3
 footerText: "Ready to collaborate? <a href='mailto:hello@example.com'>Let's connect</a> and create something amazing together."
 cta1Text: View Projects
 cta1Link: #projects
