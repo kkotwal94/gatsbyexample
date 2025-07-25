@@ -302,11 +302,24 @@ app.put('/api/markdown-files/:id', async (req, res) => {
         if (typeof value === 'string' && value.includes('\n')) {
           // Multi-line strings
           fileContent += `${key}: |\n  ${value.replace(/\n/g, '\n  ')}\n`;
-        } else if (typeof value === 'string' && (value.includes(':') || value.includes('"') || value.includes("'"))) {
-          // Strings that need quotes
-          fileContent += `${key}: "${value.replace(/"/g, '\\"')}"\n`;
+        } else if (typeof value === 'string') {
+          // Handle JSON strings and other complex strings
+          if (value.startsWith('[') && value.endsWith(']')) {
+            // JSON array - use single quotes to avoid escaping
+            fileContent += `${key}: '${value}'\n`;
+          } else if (value.startsWith('{') && value.endsWith('}')) {
+            // JSON object - use single quotes to avoid escaping  
+            fileContent += `${key}: '${value}'\n`;
+          } else if (value.includes(':') || value.includes('"') || value.includes("'") || value.includes('#')) {
+            // Strings that need quotes - use double quotes and minimal escaping
+            const escapedValue = value.replace(/"/g, '\\"');
+            fileContent += `${key}: "${escapedValue}"\n`;
+          } else {
+            // Simple strings - add quotes for safety
+            fileContent += `${key}: "${value}"\n`;
+          }
         } else {
-          // Simple values
+          // Non-string values (numbers, booleans, etc.)
           fileContent += `${key}: ${value}\n`;
         }
       });
@@ -375,10 +388,26 @@ app.post('/api/markdown-files', async (req, res) => {
       
       Object.entries(frontmatter).forEach(([key, value]) => {
         if (typeof value === 'string' && value.includes('\n')) {
+          // Multi-line strings
           fileContent += `${key}: |\n  ${value.replace(/\n/g, '\n  ')}\n`;
-        } else if (typeof value === 'string' && (value.includes(':') || value.includes('"') || value.includes("'"))) {
-          fileContent += `${key}: "${value.replace(/"/g, '\\"')}"\n`;
+        } else if (typeof value === 'string') {
+          // Handle JSON strings and other complex strings
+          if (value.startsWith('[') && value.endsWith(']')) {
+            // JSON array - use single quotes to avoid escaping
+            fileContent += `${key}: '${value}'\n`;
+          } else if (value.startsWith('{') && value.endsWith('}')) {
+            // JSON object - use single quotes to avoid escaping  
+            fileContent += `${key}: '${value}'\n`;
+          } else if (value.includes(':') || value.includes('"') || value.includes("'") || value.includes('#')) {
+            // Strings that need quotes - use double quotes and minimal escaping
+            const escapedValue = value.replace(/"/g, '\\"');
+            fileContent += `${key}: "${escapedValue}"\n`;
+          } else {
+            // Simple strings - add quotes for safety
+            fileContent += `${key}: "${value}"\n`;
+          }
         } else {
+          // Non-string values (numbers, booleans, etc.)
           fileContent += `${key}: ${value}\n`;
         }
       });
