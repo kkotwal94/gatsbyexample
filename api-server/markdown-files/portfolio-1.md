@@ -1,5 +1,5 @@
 ---
-title: "Creative Portfolio Showcases"
+title: "Creative Portfolio Showcases v2"
 description: "Explore my journey through design, development, and digital innovation"
 image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop"
 template: "template3"
@@ -8,9 +8,11 @@ cta1Text: "View Projects"
 cta1Link: "#projects"
 cta2Text: "Download Resume"
 cta2Link: "/resume.pdf"
-stats: '[{"value": "50+", "label": "Projects Completed"}, {"value": "30+", "label": "Happy Clients"}, {"value": "5", "label": "Years Experience"}, {"value": "15", "label": "Awards Won"}]'
-features: '[{"icon": "🎨", "title": "UI/UX Design", "description": "Creating intuitive and beautiful user experiences that delight and engage"}, {"icon": "💻", "title": "Full-Stack Development", "description": "Building robust applications with modern technologies and best practices"}, {"icon": "📱", "title": "Mobile Development", "description": "Native and cross-platform mobile apps that perform flawlessly"}, {"icon": "🚀", "title": "Performance Optimization", "description": "Making applications faster and more efficient for better user experience"}]'
+stats: '[{\"value\": \"50+\", \"label\": \"Projects Completed\"}, {\"value\": \"30+\", \"label\": \"Happy Clients\"}, {\"value\": \"5\", \"label\": \"Years Experience\"}, {\"value\": \"15\", \"label\": \"Awards Won\"}]'
+features: '[{\"icon\": \"🎨\", \"title\": \"UI/UX Design\", \"description\": \"Creating intuitive and beautiful user experiences that delight and engage\"}, {\"icon\": \"💻\", \"title\": \"Full-Stack Development\", \"description\": \"Building robust applications with modern technologies and best practices\"}, {\"icon\": \"📱\", \"title\": \"Mobile Development\", \"description\": \"Native and cross-platform mobile apps that perform flawlessly\"}, {\"icon\": \"🚀\", \"title\": \"Performance Optimization\", \"description\": \"Making applications faster and more efficient for better user experience\"}]'
 ---
+
+
 
 
 
