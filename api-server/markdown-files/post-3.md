@@ -1,5 +1,5 @@
 ---
-title: "Building Your First JAMstack Application"
+title: "Building Your First JAMstack Application 2"
 description: "A step-by-step tutorial for creating modern web applications with JavaScript, APIs, and Markup"
 image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&h=800&fit=crop"
 footerText: "Need help with your JAMstack project? Our expert developers are here to assist!"
