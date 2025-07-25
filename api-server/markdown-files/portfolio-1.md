@@ -5,21 +5,18 @@ image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fi
 template: template3
 footerText: "Ready to collaborate? <a href='mailto:hello@example.com'>Let's connect</a> and create something amazing together."
 cta1Text: View Projects
-cta1Link: null
+cta1Link: #projects
 cta2Text: Download Resume
 cta2Link: /resume.pdf
-stats: "[{\\\"value\\\": \\\"50+\\\", \\\"label\\\": \\\"Projects Completed\\\"}, {\\\"value\\\": \\\"30+\\\", \\\"label\\\": \\\"Happy Clients\\\"}, {\\\"value\\\": \\\"5\\\", \\\"label\\\": \\\"Years Experience\\\"}, {\\\"value\\\": \\\"15\\\", \\\"label\\\": \\\"Awards Won\\\"}]"
-features: "[{\\\"icon\\\": \\\"🎨\\\", \\\"title\\\": \\\"UI/UX Design\\\", \\\"description\\\": \\\"Creating intuitive and beautiful user experiences that delight and engage\\\"}, {\\\"icon\\\": \\\"💻\\\", \\\"title\\\": \\\"Full-Stack Development\\\", \\\"description\\\": \\\"Building robust applications with modern technologies and best practices\\\"}, {\\\"icon\\\": \\\"📱\\\", \\\"title\\\": \\\"Mobile Development\\\", \\\"description\\\": \\\"Native and cross-platform mobile apps that perform flawlessly\\\"}, {\\\"icon\\\": \\\"🚀\\\", \\\"title\\\": \\\"Performance Optimization\\\", \\\"description\\\": \\\"Making applications faster and more efficient for better user experience\\\"}]"
+stats: "[{\\"value\\": \\"50+\\", \\"label\\": \\"Projects Completed\\"}, {\\"value\\": \\"30+\\", \\"label\\": \\"Happy Clients\\"}, {\\"value\\": \\"5\\", \\"label\\": \\"Years Experience\\"}, {\\"value\\": \\"15\\", \\"label\\": \\"Awards Won\\"}]"
+features: "[{\\"icon\\": \\"🎨\\", \\"title\\": \\"UI/UX Design\\", \\"description\\": \\"Creating intuitive and beautiful user experiences that delight and engage\\"}, {\\"icon\\": \\"💻\\", \\"title\\": \\"Full-Stack Development\\", \\"description\\": \\"Building robust applications with modern technologies and best practices\\"}, {\\"icon\\": \\"📱\\", \\"title\\": \\"Mobile Development\\", \\"description\\": \\"Native and cross-platform mobile apps that perform flawlessly\\"}, {\\"icon\\": \\"🚀\\", \\"title\\": \\"Performance Optimization\\", \\"description\\": \\"Making applications faster and more efficient for better user experience\\"}]"
 ---
-
-
-
 
 
 
 ## About My Work
 
-I'm a passionate full-stack developer (cool) and designer with a love for creating digital experiences that make a difference. My approach combines technical excellence with creative innovation to deliver solutions that not only work flawlessly but also inspire and engage users.
+I'm a passionate full-stack developer and designer with a love for creating digital experiences that make a difference. My approach combines technical excellence with creative innovation to deliver solutions that not only work flawlessly but also inspire and engage users.
 
 ## Featured Projects
 
