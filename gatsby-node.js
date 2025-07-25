@@ -11,8 +11,8 @@ exports.createSchemaCustomization = ({ actions }) => {
       slug: String!
       title: String!
       description: String!
-      image: String!
-      footerText: String!
+      image: String
+      footerText: String
       template: String!
       content: String!
       date: String
@@ -22,6 +22,14 @@ exports.createSchemaCustomization = ({ actions }) => {
       client: String
       tags: [String]
       results: [String]
+      cta1Text: String
+      cta1Link: String
+      cta2Text: String
+      cta2Link: String
+      stats: String
+      features: String
+      version: String
+      lastUpdated: String
     }
   `;
   
@@ -138,9 +146,21 @@ exports.createPages = async ({ graphql, actions }) => {
   
   // Create a page for each markdown post
   result.data.allMarkdownPost.nodes.forEach(post => {
-    const templatePath = post.template === 'template2' 
-      ? path.resolve('./src/templates/template2.js')
-      : path.resolve('./src/templates/template1.js');
+    let templatePath;
+    
+    switch(post.template) {
+      case 'template2':
+        templatePath = path.resolve('./src/templates/template2.js');
+        break;
+      case 'template3':
+        templatePath = path.resolve('./src/templates/template3.js');
+        break;
+      case 'template4':
+        templatePath = path.resolve('./src/templates/template4.js');
+        break;
+      default:
+        templatePath = path.resolve('./src/templates/template1.js');
+    }
     
     createPage({
       path: `/posts/${post.slug}`,
