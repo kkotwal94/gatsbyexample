@@ -1,13 +1,15 @@
 ---
-title: "Introducing CloudSync Pro 2.0"
-description: "The ultimate cloud synchronization solution for modern businesses"
+title: Introducing CloudSync Pro 2.1
+description: The ultimate cloud synchronization solution for modern businesses
 image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=800&fit=crop"
-footerText: "Start your free 30-day trial today - No credit card required!"
-template: "template2"
-date: "2024-01-20"
-author: "Product Team"
-category: "Product Launch"
+footerText: Start your free 30-day trial today - No credit card required!
+template: template2
+date: 2024-01-20
+author: Product Team
+category: Product Launch
 ---
+
+
 
 # CloudSync Pro 2.0: Revolutionizing Cloud Storage
 
