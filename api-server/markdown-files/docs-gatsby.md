@@ -30,7 +30,9 @@ readTime: "15 min"
 
 
 
-## Introduction10x
+
+
+## Introduction120
 
 Gatsby is a free and open source framework based on React that helps developers build blazing fast websites and apps. It combines the best of React, GraphQL, and modern JavaScript to create incredibly performant websites.
 
