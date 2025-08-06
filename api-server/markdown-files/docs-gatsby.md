@@ -1,5 +1,5 @@
 ---
-title: "Getting Started with Gatsby"
+title: "Getting Started with Gatsby!"
 description: "A comprehensive guide to building blazing fast websites with Gatsby"
 template: "template4"
 version: "5.13.0"
@@ -7,6 +7,8 @@ lastUpdated: "2024-01-15"
 author: "Documentation Team"
 readTime: "15 min"
 ---
+
+
 
 
 
